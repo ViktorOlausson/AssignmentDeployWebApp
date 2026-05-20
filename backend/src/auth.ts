@@ -1,0 +1,74 @@
+import * as dotenv from "dotenv";
+import type { RequestHandler } from "express";
+import expressOpenIdConnect from "express-openid-connect";
+
+dotenv.config({ path: ["backend/.env", ".env"], quiet: true });
+
+const { auth, requiresAuth: auth0RequiresAuth } = expressOpenIdConnect;
+
+const requiredEnv = (name: string): string => {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`${name} is not set`);
+  }
+
+  return value;
+};
+
+const isTest = process.env.NODE_ENV === "test";
+
+const testAuthMiddleware: RequestHandler = (req, _res, next) => {
+  if (req.header("x-test-user")) {
+    req.oidc = {
+      isAuthenticated: () => true,
+      user: {
+        name: "Test User",
+        email: "test@example.com",
+      },
+    } as unknown as typeof req.oidc;
+  }
+
+  next();
+};
+
+const testRequiresAuth = (): RequestHandler => (req, res, next) => {
+  if (req.header("x-test-user")) {
+    next();
+    return;
+  }
+
+  res.status(401).json({ error: "Unauthorized" });
+};
+
+const createAuth0Config = () => {
+  const clientSecret = process.env.AUTH0_CLIENT_SECRET;
+  const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+
+  return {
+    authRequired: false,
+    auth0Logout: true,
+    errorOnRequiredAuth: true,
+    secret: requiredEnv("AUTH0_SECRET"),
+    baseURL: requiredEnv("AUTH0_BASE_URL"),
+    clientID: requiredEnv("AUTH0_CLIENT_ID"),
+    issuerBaseURL: requiredEnv("AUTH0_ISSUER_BASE_URL"),
+    routes: {
+      login: false as const,
+      postLogoutRedirect: `${frontendOrigin}/login`,
+    },
+    ...(clientSecret
+      ? {
+          clientSecret,
+          authorizationParams: {
+            response_type: "code",
+            response_mode: "query",
+            scope: "openid profile email",
+          },
+        }
+      : {}),
+  };
+};
+
+export const authMiddleware: RequestHandler = isTest ? testAuthMiddleware : auth(createAuth0Config());
+export const requiresAuth: () => RequestHandler = isTest ? testRequiresAuth : auth0RequiresAuth;
