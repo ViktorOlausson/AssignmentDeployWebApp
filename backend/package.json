@@ -12,7 +12,8 @@
     "lint:fix": "eslint --fix",
     "migrate": "node scripts/migrate.mjs",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "prisma db seed"
+    "prisma:seed": "prisma db seed",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
