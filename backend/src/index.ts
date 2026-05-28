@@ -116,6 +116,7 @@ app.post("/gyms/:id/reviews", requiresAuth(), async (req, res) => {
     });
   }
 
+
   const review = await prisma.review.create({
     data: {
       rating: Number(rating),
@@ -133,4 +134,24 @@ app.get("/profile", requiresAuth(), (req, res) => {
   res.status(200).json({
     user: req.oidc.user,
   });
+});
+
+app.delete("/gyms/:id", requiresAuth(), async (req, res) => {
+  const id = Number(req.params.id);
+
+  const gym = await prisma.gym.findUnique({
+    where: { id },
+  });
+
+  if (!gym) {
+    logger.info(`Gym delete rejected: ${id} not found`);
+    return res.status(404).json({ error: "Gym not found" });
+  }
+
+  await prisma.gym.delete({
+    where: { id },
+  });
+
+  logger.info(`Gym deleted: ${id}`);
+  res.status(200).json({ message: "Gym deleted" });
 });
