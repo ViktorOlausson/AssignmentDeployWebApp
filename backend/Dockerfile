@@ -14,6 +14,8 @@ RUN npx prisma generate
 
 RUN npm run build
 
+ENV NODE_ENV=production
+
 RUN chmod +x docker-entrypoint.sh && mkdir -p /app/data
 
 EXPOSE 3000

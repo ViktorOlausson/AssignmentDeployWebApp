@@ -17,7 +17,7 @@ const requiredEnv = (name: string): string => {
   return value;
 };
 
-const isTest = process.env.NODE_ENV === "test";
+export const isTestAuthEnabled = process.env.NODE_ENV === "test" && process.env.ENABLE_TEST_AUTH === "true";
 
 const testUser = {
   name: "Test User",
@@ -87,6 +87,7 @@ const createAuth0Config = () => {
     issuerBaseURL: requiredEnv("AUTH0_ISSUER_BASE_URL"),
     routes: {
       login: false as const,
+      logout: false as const,
       postLogoutRedirect: `${frontendOrigin}/login`,
     },
     ...(clientSecret
@@ -102,5 +103,5 @@ const createAuth0Config = () => {
   };
 };
 
-export const authMiddleware: RequestHandler = isTest ? testAuthMiddleware : auth(createAuth0Config());
-export const requiresAuth: () => RequestHandler = isTest ? testRequiresAuth : auth0RequiresAuth;
+export const authMiddleware: RequestHandler = isTestAuthEnabled ? testAuthMiddleware : auth(createAuth0Config());
+export const requiresAuth: () => RequestHandler = isTestAuthEnabled ? testRequiresAuth : auth0RequiresAuth;

@@ -1,13 +1,22 @@
 import dotenv from "dotenv";
 import express from "express";
+import type { ErrorRequestHandler } from "express";
 import cors from "cors";
 import { prisma } from "./prisma.js";
-import { authMiddleware, requiresAuth } from "./auth.js";
+import { authMiddleware, isTestAuthEnabled, requiresAuth } from "./auth.js";
 import logger from "./logger.js";
 
 dotenv.config({ path: ["backend/.env", ".env"], quiet: true });
 
 export const app = express();
+
+type HttpError = Error & {
+  status?: number;
+  statusCode?: number;
+};
+
+const getFrontendOrigin = () => (process.env.FRONTEND_ORIGIN || "http://localhost:5173").replace(/\/$/, "");
+const getFrontendLoginUrl = () => `${getFrontendOrigin()}/login`;
 
 app.use(express.json());
 
@@ -21,11 +30,11 @@ app.use(
 app.use(authMiddleware);
 
 app.get("/login", (req, res) => {
-  const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+  const frontendOrigin = getFrontendOrigin();
 
   logger.info("Login started");
 
-  if (process.env.NODE_ENV === "test") {
+  if (isTestAuthEnabled) {
     res.cookie("test_auth", "1", {
       httpOnly: true,
       sameSite: "lax",
@@ -38,6 +47,28 @@ app.get("/login", (req, res) => {
   res.oidc.login({
     returnTo: `${frontendOrigin}/profile`,
   });
+});
+
+app.get("/logout", async (req, res, next) => {
+  const loginUrl = getFrontendLoginUrl();
+
+  logger.info("Logout started");
+
+  if (isTestAuthEnabled) {
+    res.clearCookie("test_auth", {
+      path: "/",
+    });
+    res.redirect(loginUrl);
+    return;
+  }
+
+  try {
+    await res.oidc.logout({
+      returnTo: loginUrl,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.get("/ping", (req, res) => {
@@ -134,3 +165,18 @@ app.get("/profile", requiresAuth(), (req, res) => {
     user: req.oidc.user,
   });
 });
+
+const errorHandler: ErrorRequestHandler = (error: HttpError, req, res, _next) => {
+  const status = error.status || error.statusCode || 500;
+
+  if (status === 401) {
+    logger.info(`Unauthorized request: ${req.method} ${req.path}`);
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  logger.error(error.stack || error.message || "Unexpected server error");
+  res.status(status).json({ error: "Internal server error" });
+};
+
+app.use(errorHandler);

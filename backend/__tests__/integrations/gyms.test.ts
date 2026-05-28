@@ -115,6 +115,21 @@ describe("Gym API integration tests", () => {
     createdGymIds.push(data.id);
   });
 
+  it("GET /logout clears the test session and redirects to login", async () => {
+    const res = await request("/logout", {
+      headers: {
+        cookie: "test_auth=1",
+      },
+      redirect: "manual",
+    });
+    const setCookie = res.headers.get("set-cookie");
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe("http://localhost:5173/login");
+    expect(setCookie).toContain("test_auth=");
+    expect(setCookie).toContain("Path=/");
+  });
+
   it("POST /gyms/:id/reviews without login returns 401", async () => {
     const res = await request(`/gyms/${testGymId}/reviews`, {
       method: "POST",
