@@ -78,6 +78,23 @@ export function Gyms() {
     return () => controller.abort();
   }, []);
 
+  async function handleDelete(id: number) {
+    const response = await fetch(`${apiBaseUrl}/gyms/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      setState((prev) => {
+        if (prev.status !== "loaded") return prev;
+        return {
+          status: "loaded",
+          gyms: prev.gyms.filter((g) => g.id !== id),
+        };
+      });
+    }
+  }
+
   if (state.status === "loading") {
     return <LoadingPage />;
   }
@@ -126,6 +143,10 @@ export function Gyms() {
                     <Star size={17} strokeWidth={2.2} />
                     {formatRating(gym.reviews)}
                   </div>
+
+                  <button onClick={() => handleDelete(gym.id)}>
+                    Delete
+                  </button>
                 </div>
 
                 <div className="review-section">
