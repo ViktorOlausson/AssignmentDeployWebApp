@@ -12,21 +12,22 @@ const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
 const prisma = new PrismaClient({ adapter });
 
 try {
-  await prisma.review.deleteMany();
-  await prisma.gym.deleteMany();
+  const gymCount = await prisma.gym.count();
 
-  await prisma.gym.createMany({
-    data: [
-      {
-        name: "Iron House Gym",
-        location: "Stockholm",
-      },
-      {
-        name: "Nordic Fitness",
-        location: "Göteborg",
-      },
-    ],
-  });
+  if (gymCount === 0) {
+    await prisma.gym.createMany({
+      data: [
+        {
+          name: "Iron House Gym",
+          location: "Stockholm",
+        },
+        {
+          name: "Nordic Fitness",
+          location: "Goteborg",
+        },
+      ],
+    });
+  }
 } finally {
   await prisma.$disconnect();
 }

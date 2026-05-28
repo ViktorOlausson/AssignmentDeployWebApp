@@ -1,4 +1,5 @@
 import * as dotenv from "dotenv";
+import type { Request } from "express";
 import type { RequestHandler } from "express";
 import expressOpenIdConnect from "express-openid-connect";
 
@@ -18,13 +19,43 @@ const requiredEnv = (name: string): string => {
 
 const isTest = process.env.NODE_ENV === "test";
 
+const testUser = {
+  name: "Test User",
+  email: "test@example.com",
+  sub: "test-user",
+};
+
+const hasTestSession = (req: Request) =>
+  req.header("x-test-user") === "true" || req.header("cookie")?.includes("test_auth=1");
+
+const setTestOidc = (req: Request) => {
+  req.oidc = {
+    isAuthenticated: () => true,
+    user: testUser,
+    login: ({ returnTo }: { returnTo?: string } = {}) => {
+      req.res?.cookie("test_auth", "1", {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+      });
+      req.res?.redirect(returnTo || "/profile");
+    },
+  } as unknown as typeof req.oidc;
+};
+
 const testAuthMiddleware: RequestHandler = (req, _res, next) => {
-  if (req.header("x-test-user")) {
+  if (hasTestSession(req)) {
+    setTestOidc(req);
+  } else if (req.path === "/login") {
     req.oidc = {
-      isAuthenticated: () => true,
-      user: {
-        name: "Test User",
-        email: "test@example.com",
+      isAuthenticated: () => false,
+      login: ({ returnTo }: { returnTo?: string } = {}) => {
+        req.res?.cookie("test_auth", "1", {
+          httpOnly: true,
+          sameSite: "lax",
+          path: "/",
+        });
+        req.res?.redirect(returnTo || "/profile");
       },
     } as unknown as typeof req.oidc;
   }
@@ -33,7 +64,8 @@ const testAuthMiddleware: RequestHandler = (req, _res, next) => {
 };
 
 const testRequiresAuth = (): RequestHandler => (req, res, next) => {
-  if (req.header("x-test-user")) {
+  if (hasTestSession(req)) {
+    setTestOidc(req);
     next();
     return;
   }
