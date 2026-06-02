@@ -1,7 +1,9 @@
 import { FormEvent, useState } from "react";
 import { CirclePlus } from "lucide-react";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+const apiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL ??
+  "https://assignmentdeploywebapp-backend.onrender.com";
 
 type SubmitState =
   | { status: "idle" }
@@ -12,7 +14,9 @@ type SubmitState =
 export function NewGym() {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
-  const [submitState, setSubmitState] = useState<SubmitState>({ status: "idle" });
+  const [submitState, setSubmitState] = useState<SubmitState>({
+    status: "idle",
+  });
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,29 +43,49 @@ export function NewGym() {
 
   return (
     <main className="dashboard-page">
-      <section className="dashboard-shell form-shell" aria-labelledby="new-gym-title">
+      <section
+        className="dashboard-shell form-shell"
+        aria-labelledby="new-gym-title"
+      >
         <div className="page-heading">
           <p className="eyebrow">Protected</p>
           <h1 id="new-gym-title">Add Gym</h1>
-          <p className="supporting-copy">Create a gym listing for the public directory.</p>
+          <p className="supporting-copy">
+            Create a gym listing for the public directory.
+          </p>
         </div>
 
         <form className="form-panel" onSubmit={handleSubmit}>
           <label className="field">
             <span>Name</span>
-            <input value={name} onChange={(event) => setName(event.target.value)} required />
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+            />
           </label>
 
           <label className="field">
             <span>Location</span>
-            <input value={location} onChange={(event) => setLocation(event.target.value)} required />
+            <input
+              value={location}
+              onChange={(event) => setLocation(event.target.value)}
+              required
+            />
           </label>
 
-          {submitState.status === "success" || submitState.status === "error" ? (
-            <p className={`form-message ${submitState.status}`}>{submitState.message}</p>
+          {submitState.status === "success" ||
+          submitState.status === "error" ? (
+            <p className={`form-message ${submitState.status}`}>
+              {submitState.message}
+            </p>
           ) : null}
 
-          <button className="submit-button" type="submit" disabled={submitState.status === "submitting"}>
+          <button
+            className="submit-button"
+            type="submit"
+            disabled={submitState.status === "submitting"}
+          >
             <CirclePlus size={20} strokeWidth={2.2} />
             {submitState.status === "submitting" ? "Creating..." : "Create gym"}
           </button>

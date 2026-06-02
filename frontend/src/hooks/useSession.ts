@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+const apiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL ??
+  "https://assignmentdeploywebapp-backend.onrender.com";
 
 type SessionState = "loading" | "authenticated" | "unauthenticated";
 

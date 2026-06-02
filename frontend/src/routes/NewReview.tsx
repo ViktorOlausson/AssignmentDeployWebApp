@@ -2,7 +2,9 @@ import { FormEvent, useEffect, useState } from "react";
 import { MessageSquareText } from "lucide-react";
 import { LoadingPage } from "../components/LoadingPanel";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+const apiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL ??
+  "https://assignmentdeploywebapp-backend.onrender.com";
 
 type Gym = {
   id: number;
@@ -26,7 +28,9 @@ export function NewReview() {
   const [gymId, setGymId] = useState("");
   const [rating, setRating] = useState("5");
   const [comment, setComment] = useState("");
-  const [submitState, setSubmitState] = useState<SubmitState>({ status: "idle" });
+  const [submitState, setSubmitState] = useState<SubmitState>({
+    status: "idle",
+  });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -38,7 +42,10 @@ export function NewReview() {
         });
 
         if (!response.ok) {
-          setLoadState({ status: "error", message: "Gyms could not be loaded." });
+          setLoadState({
+            status: "error",
+            message: "Gyms could not be loaded.",
+          });
           return;
         }
 
@@ -73,7 +80,10 @@ export function NewReview() {
     });
 
     if (!response.ok) {
-      setSubmitState({ status: "error", message: "Review could not be created." });
+      setSubmitState({
+        status: "error",
+        message: "Review could not be created.",
+      });
       return;
     }
 
@@ -101,11 +111,16 @@ export function NewReview() {
 
   return (
     <main className="dashboard-page">
-      <section className="dashboard-shell form-shell" aria-labelledby="new-review-title">
+      <section
+        className="dashboard-shell form-shell"
+        aria-labelledby="new-review-title"
+      >
         <div className="page-heading">
           <p className="eyebrow">Protected</p>
           <h1 id="new-review-title">Add Review</h1>
-          <p className="supporting-copy">Share a rating and comment for a listed gym.</p>
+          <p className="supporting-copy">
+            Share a rating and comment for a listed gym.
+          </p>
         </div>
 
         {loadState.gyms.length === 0 ? (
@@ -117,7 +132,11 @@ export function NewReview() {
           <form className="form-panel" onSubmit={handleSubmit}>
             <label className="field">
               <span>Gym</span>
-              <select value={gymId} onChange={(event) => setGymId(event.target.value)} required>
+              <select
+                value={gymId}
+                onChange={(event) => setGymId(event.target.value)}
+                required
+              >
                 {loadState.gyms.map((gym) => (
                   <option key={gym.id} value={gym.id}>
                     {gym.name} - {gym.location}
@@ -140,20 +159,33 @@ export function NewReview() {
 
             <label className="field">
               <span>Comment</span>
-              <textarea value={comment} onChange={(event) => setComment(event.target.value)} required />
+              <textarea
+                value={comment}
+                onChange={(event) => setComment(event.target.value)}
+                required
+              />
             </label>
 
-            {submitState.status === "success" || submitState.status === "error" ? (
-              <p className={`form-message ${submitState.status}`}>{submitState.message}</p>
+            {submitState.status === "success" ||
+            submitState.status === "error" ? (
+              <p className={`form-message ${submitState.status}`}>
+                {submitState.message}
+              </p>
             ) : null}
 
-            <button className="submit-button" type="submit" disabled={submitState.status === "submitting"}>
+            <button
+              className="submit-button"
+              type="submit"
+              disabled={submitState.status === "submitting"}
+            >
               {submitState.status === "submitting" ? (
                 <span className="button-spinner" aria-hidden="true" />
               ) : (
                 <MessageSquareText size={20} strokeWidth={2.2} />
               )}
-              {submitState.status === "submitting" ? "Creating..." : "Create review"}
+              {submitState.status === "submitting"
+                ? "Creating..."
+                : "Create review"}
             </button>
           </form>
         )}
