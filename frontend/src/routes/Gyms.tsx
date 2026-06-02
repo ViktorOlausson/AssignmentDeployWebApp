@@ -58,7 +58,7 @@ export function Gyms() {
         });
 
         if (!response.ok) {
-          setState({ status: "error", message: "Gyms could not be loaded" });
+          setState({ status: "error", message: "Gyms could not be loaded!" });
           return;
         }
 
