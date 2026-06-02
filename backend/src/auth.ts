@@ -26,7 +26,8 @@ const testUser = {
 };
 
 const hasTestSession = (req: Request) =>
-  req.header("x-test-user") === "true" || req.header("cookie")?.includes("test_auth=1");
+  req.header("x-test-user") === "true" ||
+  req.header("cookie")?.includes("test_auth=1");
 
 const setTestOidc = (req: Request) => {
   req.oidc = {
@@ -86,8 +87,9 @@ const createAuth0Config = () => {
     clientID: requiredEnv("AUTH0_CLIENT_ID"),
     issuerBaseURL: requiredEnv("AUTH0_ISSUER_BASE_URL"),
     routes: {
-      login: false as const,
-      postLogoutRedirect: `${frontendOrigin}/login`,
+      callback: "/callback",
+      login: "/login",
+      logout: "/logout",
     },
     ...(clientSecret
       ? {
@@ -102,5 +104,9 @@ const createAuth0Config = () => {
   };
 };
 
-export const authMiddleware: RequestHandler = isTest ? testAuthMiddleware : auth(createAuth0Config());
-export const requiresAuth: () => RequestHandler = isTest ? testRequiresAuth : auth0RequiresAuth;
+export const authMiddleware: RequestHandler = isTest
+  ? testAuthMiddleware
+  : auth(createAuth0Config());
+export const requiresAuth: () => RequestHandler = isTest
+  ? testRequiresAuth
+  : auth0RequiresAuth;

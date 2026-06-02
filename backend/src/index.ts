@@ -9,6 +9,8 @@ dotenv.config({ path: ["backend/.env", ".env"], quiet: true });
 
 export const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(express.json());
 
 app.use(
@@ -115,7 +117,6 @@ app.post("/gyms/:id/reviews", requiresAuth(), async (req, res) => {
       error: "Rating and comment are required",
     });
   }
-
 
   const review = await prisma.review.create({
     data: {
