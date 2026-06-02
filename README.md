@@ -3,14 +3,16 @@
 Group Assignment 4: Building and securing a tested REST API and deploy online.
 
 This project is a small full-stack Gym Review application with a tested REST API, Auth0 authentication, protected routes, and a React frontend.
+## Run the app online
+* Go to https://AssignmentDeployWebApp.onrender.com
 
 ## Setup
 
 ### Clone the repository
 
 ```bash
-git clone https://github.com/ViktorOlausson/AssignmentTestsAndSecureAPI.git
-cd AssignmentTestsAndSecureAPI
+git clone https://github.com/ViktorOlausson/AssignmentDeployWebApp.git
+cd AssignmentDeployWebApp
 ```
 
 ### Install dependencies
@@ -108,6 +110,22 @@ Open:
 ```text
 http://localhost:5173
 ```
+
+## Setup docker
+* From the project root dir, run:
+```bash
+docker compose up
+[+] up 3/3
+ ✔ Network assignmentdeploywebapp_default      Created                     0.1s
+ ✔ Container assignmentdeploywebapp-backend-1  Created                     0.1s
+ ✔ Container assignmentdeploywebapp-frontend-1 Created                     0.1s
+Attaching to backend-1, frontend-1
+```
+* Check if docker images is up and running:
+```bash
+docker ps
+```
+* Go to http://localhost:5173
 
 ## API Routes
 
