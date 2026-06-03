@@ -1,0 +1,59 @@
+name: CI / Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-build:
+    name: Install, test, and build
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: file:./ci.db
+      FRONTEND_ORIGIN: http://localhost:5173
+      AUTH0_SECRET: ci-test-secret-ci-test-secret-ci-test-secret
+      AUTH0_BASE_URL: http://localhost:3000
+      AUTH0_CLIENT_ID: ci-test-client-id
+      AUTH0_ISSUER_BASE_URL: https://example.auth0.com
+      AUTH0_CLIENT_SECRET: ""
+      VITE_API_BASE_URL: http://localhost:3000
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Use Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+        working-directory: backend
+
+      - name: Check backend TypeScript
+        run: npm run build
+        working-directory: backend
+
+      - name: Run backend tests
+        run: npm test
+        working-directory: backend
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
