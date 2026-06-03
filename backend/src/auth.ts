@@ -27,7 +27,8 @@ const testUser = {
 };
 
 const hasTestSession = (req: Request) =>
-  req.header("x-test-user") === "true" || req.header("cookie")?.includes("test_auth=1");
+  req.header("x-test-user") === "true" ||
+  req.header("cookie")?.includes("test_auth=1");
 
 const setTestOidc = (req: Request) => {
   req.oidc = {
@@ -94,7 +95,7 @@ const createAuth0Config = () => {
 
   return {
     authRequired: false,
-    auth0Logout: false,
+    auth0Logout: true,
     errorOnRequiredAuth: true,
     secret: requiredEnv("AUTH0_SECRET"),
     baseURL: auth0BaseUrl,
