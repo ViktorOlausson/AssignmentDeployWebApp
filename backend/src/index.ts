@@ -25,16 +25,6 @@ app.get("/login", (req, res) => {
 
   logger.info("Login started");
 
-  if (process.env.NODE_ENV === "test") {
-    res.cookie("test_auth", "1", {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-    });
-    res.redirect(`${frontendOrigin}/profile`);
-    return;
-  }
-
   res.oidc.login({
     returnTo: `${frontendOrigin}/profile`,
   });
