@@ -72,6 +72,11 @@ jobs:
 
       - name: Deploy frontend to Render
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: curl -X POST "$RENDER_FRONTEND_DEPLOY_HOOK_URL"
+        run: |
+          if [ -z "$RENDER_FRONTEND_DEPLOY_HOOK_URL" ]; then
+            echo "No backend deploy hook configured; skipping deploy."
+            exit 0
+          fi
+          curl -X POST "$RENDER_FRONTEND_DEPLOY_HOOK_URL"
         env:
           RENDER_FRONTEND_DEPLOY_HOOK_URL: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }}
