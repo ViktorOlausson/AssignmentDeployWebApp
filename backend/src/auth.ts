@@ -41,6 +41,12 @@ const setTestOidc = (req: Request) => {
       });
       req.res?.redirect(returnTo || "/profile");
     },
+    logout: ({ returnTo }: { returnTo?: string } = {}) => {
+      req.res?.clearCookie("test_auth", {
+        path: "/",
+      });
+      req.res?.redirect(returnTo || "/login");
+    },
   } as unknown as typeof req.oidc;
 };
 
@@ -57,6 +63,12 @@ const testAuthMiddleware: RequestHandler = (req, _res, next) => {
           path: "/",
         });
         req.res?.redirect(returnTo || "/profile");
+      },
+      logout: ({ returnTo }: { returnTo?: string } = {}) => {
+        req.res?.clearCookie("test_auth", {
+          path: "/",
+        });
+        req.res?.redirect(returnTo || "/login");
       },
     } as unknown as typeof req.oidc;
   }
@@ -96,6 +108,7 @@ const createAuth0Config = () => {
     },
     routes: {
       login: false as const,
+      logout: false as const,
       postLogoutRedirect: `${frontendOrigin}/login`,
     },
     ...(clientSecret

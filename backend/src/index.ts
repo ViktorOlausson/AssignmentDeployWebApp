@@ -30,6 +30,16 @@ app.get("/login", (req, res) => {
   });
 });
 
+app.get("/logout", (req, res) => {
+  const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+
+  logger.info("Logout started");
+
+  res.oidc.logout({
+    returnTo: `${frontendOrigin}/login`,
+  });
+});
+
 app.get("/ping", (req, res) => {
   logger.info("Ping checked");
   res.json({ message: "pong" });
