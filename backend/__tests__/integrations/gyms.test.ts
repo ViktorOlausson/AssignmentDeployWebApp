@@ -63,6 +63,38 @@ describe("Gym API integration tests", () => {
     expect(Array.isArray(data)).toBe(true);
   });
 
+  it("GET /ping returns CORS headers for the configured frontend origin", async () => {
+    const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+
+    const res = await request("/ping", {
+      headers: {
+        Origin: frontendOrigin,
+      },
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("access-control-allow-origin")).toBe(frontendOrigin);
+    expect(res.headers.get("access-control-allow-credentials")).toBe("true");
+  });
+
+  it("OPTIONS /gyms returns deployment CORS preflight headers", async () => {
+    const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+
+    const res = await request("/gyms", {
+      method: "OPTIONS",
+      headers: {
+        Origin: frontendOrigin,
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type",
+      },
+    });
+
+    expect(res.status).toBe(204);
+    expect(res.headers.get("access-control-allow-origin")).toBe(frontendOrigin);
+    expect(res.headers.get("access-control-allow-credentials")).toBe("true");
+    expect(res.headers.get("access-control-allow-methods")).toContain("POST");
+  });
+
   it("GET /gyms/:id returns one gym", async () => {
     const res = await request(`/gyms/${testGymId}`);
     const data = await res.json();
