@@ -1,7 +1,6 @@
 import { FormEvent, useState } from "react";
 import { CirclePlus } from "lucide-react";
-
-const apiBaseUrl = "https://assignmentdeploywebapp-backend-qvcj.onrender.com";
+import { apiBaseUrl } from "../config";
 
 type SubmitState =
   | { status: "idle" }

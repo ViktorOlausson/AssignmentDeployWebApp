@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 import { UserRound } from "lucide-react";
 import { useSession } from "../hooks/useSession";
 import { LoadingPage } from "./LoadingPanel";
-
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+import { apiBaseUrl } from "../config";
 
 type RequireLoginProps = {
   children: ReactNode;

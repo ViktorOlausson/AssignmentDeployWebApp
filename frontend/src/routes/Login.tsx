@@ -1,6 +1,5 @@
 import { Dumbbell, LogIn } from "lucide-react";
-
-const apiBaseUrl = "https://assignmentdeploywebapp-backend-qvcj.onrender.com";
+import { apiBaseUrl } from "../config";
 
 export function Login() {
   return (

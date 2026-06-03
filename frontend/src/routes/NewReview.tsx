@@ -1,8 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { MessageSquareText } from "lucide-react";
 import { LoadingPage } from "../components/LoadingPanel";
-
-const apiBaseUrl = "https://assignmentdeploywebapp-backend-qvcj.onrender.com";
+import { apiBaseUrl } from "../config";
 
 type Gym = {
   id: number;

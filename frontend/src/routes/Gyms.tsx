@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { MapPin, MessageSquareText, Star } from "lucide-react";
 import { LoadingPage } from "../components/LoadingPanel";
-
-const apiBaseUrl = "https://assignmentdeploywebapp-backend-qvcj.onrender.com";
+import { apiBaseUrl } from "../config";
 
 type Review = {
   id: number;

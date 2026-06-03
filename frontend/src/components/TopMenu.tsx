@@ -9,8 +9,7 @@ import {
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
-
-const apiBaseUrl = "https://assignmentdeploywebapp-backend-qvcj.onrender.com";
+import { apiBaseUrl } from "../config";
 
 export function TopMenu() {
   const isLoggedIn = useSession() === "authenticated";

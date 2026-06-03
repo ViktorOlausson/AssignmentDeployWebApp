@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-
-const apiBaseUrl = "https://assignmentdeploywebapp-backend-qvcj.onrender.com";
+import { apiBaseUrl } from "../config";
 
 type SessionState = "loading" | "authenticated" | "unauthenticated";
 
