@@ -17,7 +17,8 @@ const requiredEnv = (name: string): string => {
   return value;
 };
 
-const isTest = process.env.NODE_ENV === "test";
+const isTestAuthEnabled =
+  process.env.ENABLE_TEST_AUTH === "true" || process.env.VITEST === "true";
 
 const testUser = {
   name: "Test User",
@@ -40,6 +41,12 @@ const setTestOidc = (req: Request) => {
       });
       req.res?.redirect(returnTo || "/profile");
     },
+    logout: ({ returnTo }: { returnTo?: string } = {}) => {
+      req.res?.clearCookie("test_auth", {
+        path: "/",
+      });
+      req.res?.redirect(returnTo || "/login");
+    },
   } as unknown as typeof req.oidc;
 };
 
@@ -56,6 +63,12 @@ const testAuthMiddleware: RequestHandler = (req, _res, next) => {
           path: "/",
         });
         req.res?.redirect(returnTo || "/profile");
+      },
+      logout: ({ returnTo }: { returnTo?: string } = {}) => {
+        req.res?.clearCookie("test_auth", {
+          path: "/",
+        });
+        req.res?.redirect(returnTo || "/login");
       },
     } as unknown as typeof req.oidc;
   }
@@ -76,17 +89,26 @@ const testRequiresAuth = (): RequestHandler => (req, res, next) => {
 const createAuth0Config = () => {
   const clientSecret = process.env.AUTH0_CLIENT_SECRET;
   const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+  const auth0BaseUrl = requiredEnv("AUTH0_BASE_URL");
+  const isHttpsBaseUrl = auth0BaseUrl.startsWith("https://");
 
   return {
     authRequired: false,
-    auth0Logout: true,
+    auth0Logout: false,
     errorOnRequiredAuth: true,
     secret: requiredEnv("AUTH0_SECRET"),
-    baseURL: requiredEnv("AUTH0_BASE_URL"),
+    baseURL: auth0BaseUrl,
     clientID: requiredEnv("AUTH0_CLIENT_ID"),
     issuerBaseURL: requiredEnv("AUTH0_ISSUER_BASE_URL"),
+    session: {
+      cookie: {
+        sameSite: isHttpsBaseUrl ? "None" : "Lax",
+        secure: isHttpsBaseUrl,
+      },
+    },
     routes: {
       login: false as const,
+      logout: false as const,
       postLogoutRedirect: `${frontendOrigin}/login`,
     },
     ...(clientSecret
@@ -102,5 +124,9 @@ const createAuth0Config = () => {
   };
 };
 
-export const authMiddleware: RequestHandler = isTest ? testAuthMiddleware : auth(createAuth0Config());
-export const requiresAuth: () => RequestHandler = isTest ? testRequiresAuth : auth0RequiresAuth;
+export const authMiddleware: RequestHandler = isTestAuthEnabled
+  ? testAuthMiddleware
+  : auth(createAuth0Config());
+export const requiresAuth: () => RequestHandler = isTestAuthEnabled
+  ? testRequiresAuth
+  : auth0RequiresAuth;

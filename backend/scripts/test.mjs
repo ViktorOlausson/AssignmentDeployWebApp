@@ -11,6 +11,7 @@ const testEnv = Object.fromEntries(
   Object.entries({
     ...process.env,
     NODE_ENV: "test",
+    ENABLE_TEST_AUTH: "true",
     DATABASE_URL: testDatabaseUrl,
   }).filter(([, value]) => value !== undefined),
 );
