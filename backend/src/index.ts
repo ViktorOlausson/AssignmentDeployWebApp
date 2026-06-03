@@ -9,11 +9,42 @@ dotenv.config({ path: ["backend/.env", ".env"], quiet: true });
 
 export const app = express();
 
+const configuredFrontendOrigin = () => process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+
+const parseRequestOrigin = (value?: string) => {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(value);
+
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return undefined;
+    }
+
+    return url.origin;
+  } catch {
+    return undefined;
+  }
+};
+
+const getFrontendOrigin = (req: express.Request) => {
+  const configuredOrigin = configuredFrontendOrigin();
+  const requestOrigin = parseRequestOrigin(req.get("origin")) || parseRequestOrigin(req.get("referer"));
+
+  if (configuredOrigin.includes("localhost") && requestOrigin) {
+    return requestOrigin;
+  }
+
+  return configuredOrigin;
+};
+
 app.use(express.json());
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
+    origin: configuredFrontendOrigin(),
     credentials: true,
   }),
 );
@@ -21,7 +52,7 @@ app.use(
 app.use(authMiddleware);
 
 app.get("/login", (req, res) => {
-  const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+  const frontendOrigin = getFrontendOrigin(req);
 
   logger.info("Login started");
 
@@ -31,7 +62,7 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-  const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+  const frontendOrigin = getFrontendOrigin(req);
 
   logger.info("Logout started");
 

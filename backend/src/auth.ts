@@ -94,7 +94,7 @@ const createAuth0Config = () => {
 
   return {
     authRequired: false,
-    auth0Logout: true,
+    auth0Logout: false,
     errorOnRequiredAuth: true,
     secret: requiredEnv("AUTH0_SECRET"),
     baseURL: auth0BaseUrl,
