@@ -1,6 +1,6 @@
 import { Dumbbell, LogIn } from "lucide-react";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+const apiBaseUrl = "https://assignmentdeploywebapp-backend-qvcj.onrender.com";
 
 export function Login() {
   return (
@@ -14,7 +14,8 @@ export function Login() {
           <p className="eyebrow">Gym Reviews</p>
           <h1 id="login-title">Sign in</h1>
           <p className="supporting-copy">
-            Continue with your account to add gyms, write reviews, and manage your profile.
+            Continue with your account to add gyms, write reviews, and manage
+            your profile.
           </p>
         </div>
 

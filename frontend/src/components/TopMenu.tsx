@@ -1,15 +1,27 @@
-import { CirclePlus, Dumbbell, LogIn, LogOut, MapPinned, MessageSquareText, UserRound } from "lucide-react";
+import {
+  CirclePlus,
+  Dumbbell,
+  LogIn,
+  LogOut,
+  MapPinned,
+  MessageSquareText,
+  UserRound,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+const apiBaseUrl = "https://assignmentdeploywebapp-backend-qvcj.onrender.com";
 
 export function TopMenu() {
   const isLoggedIn = useSession() === "authenticated";
 
   return (
     <header className="top-menu">
-      <NavLink className="top-menu-brand" to="/profile" aria-label="Gym Reviews profile">
+      <NavLink
+        className="top-menu-brand"
+        to="/profile"
+        aria-label="Gym Reviews profile"
+      >
         <span className="brand-mark menu-mark" aria-hidden="true">
           <Dumbbell size={20} strokeWidth={2.4} />
         </span>
@@ -39,7 +51,11 @@ export function TopMenu() {
               <span>Profile</span>
             </NavLink>
 
-            <a className="menu-icon-link tooltip-link" href={`${apiBaseUrl}/logout`} aria-label="Log out">
+            <a
+              className="menu-icon-link tooltip-link"
+              href={`${apiBaseUrl}/logout`}
+              aria-label="Log out"
+            >
               <LogOut size={19} strokeWidth={2.2} />
               <span className="tooltip" role="tooltip">
                 Logout

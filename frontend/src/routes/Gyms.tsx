@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { MapPin, MessageSquareText, Star } from "lucide-react";
 import { LoadingPage } from "../components/LoadingPanel";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+const apiBaseUrl = "https://assignmentdeploywebapp-backend-qvcj.onrender.com";
 
 type Review = {
   id: number;
@@ -58,7 +58,7 @@ export function Gyms() {
         });
 
         if (!response.ok) {
-          setState({ status: "error", message: "Gyms could not be loaded" });
+          setState({ status: "error", message: "Gyms could not be loaded!" });
           return;
         }
 
@@ -118,7 +118,9 @@ export function Gyms() {
         <div className="page-heading">
           <p className="eyebrow">Public Directory</p>
           <h1 id="gyms-title">Gyms</h1>
-          <p className="supporting-copy">Browse gyms and reviews from the community.</p>
+          <p className="supporting-copy">
+            Browse gyms and reviews from the community.
+          </p>
         </div>
 
         {state.gyms.length === 0 ? (
@@ -144,9 +146,7 @@ export function Gyms() {
                     {formatRating(gym.reviews)}
                   </div>
 
-                  <button onClick={() => handleDelete(gym.id)}>
-                    Delete
-                  </button>
+                  <button onClick={() => handleDelete(gym.id)}>Delete</button>
                 </div>
 
                 <div className="review-section">
@@ -161,7 +161,11 @@ export function Gyms() {
                     <div className="review-list">
                       {gym.reviews.map((review) => (
                         <div className="review-item" key={review.id}>
-                          <strong className={getReviewRatingClass(review.rating)}>{review.rating}/5</strong>
+                          <strong
+                            className={getReviewRatingClass(review.rating)}
+                          >
+                            {review.rating}/5
+                          </strong>
                           <p>{review.comment}</p>
                         </div>
                       ))}

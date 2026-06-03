@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Mail, ShieldCheck, UserRound } from "lucide-react";
 import { LoadingPage } from "../components/LoadingPanel";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+const apiBaseUrl = "https://assignmentdeploywebapp-backend-qvcj.onrender.com";
 
 type ProfileUser = {
   name?: string;
@@ -119,7 +119,9 @@ export function Profile() {
           <div>
             <p className="eyebrow">Profile Dashboard</p>
             <h1 id="profile-title">{displayName}</h1>
-            <p className="supporting-copy">{user.email || "Authenticated member"}</p>
+            <p className="supporting-copy">
+              {user.email || "Authenticated member"}
+            </p>
           </div>
         </div>
 
