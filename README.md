@@ -1,50 +1,112 @@
 # AssignmentDeployWebApp
 
-Group Assignment 4: Building and securing a tested REST API and deploy online.
+Group Assignment 4: building and securing a tested REST API, adding authentication, and deploying the app online.
 
-This project is a small full-stack Gym Review application with a tested REST API, Auth0 authentication, protected routes, and a React frontend.
-## Run the app online
-* Go to https://AssignmentDeployWebApp.onrender.com
+This repository contains a full-stack Gym Review application. Public visitors can browse gyms and reviews. Authenticated users can sign in with Auth0, view their profile, create gym listings, create reviews, and delete gyms.
 
-## Setup
+## Public Website
 
-### Clone the repository
+The deployed public website is here:
+
+```text
+https://assignmentdeploywebapp-frontend.onrender.com
+```
+
+The deployed backend API is here:
+
+```text
+https://assignmentdeploywebapp-backend-qvcj.onrender.com
+```
+
+The frontend automatically uses the local API at `http://localhost:3000` when opened from `localhost` or `127.0.0.1`. In production it uses `VITE_API_BASE_URL` when that variable is set, otherwise it falls back to the deployed Render backend URL above.
+
+## How The App Works
+
+The app is split into two services:
+
+- `frontend`: a React and Vite single page app.
+- `backend`: an Express REST API using Prisma and SQLite.
+
+The main browser routes are:
+
+| Route | Purpose | Access |
+| --- | --- | --- |
+| `/login` | Sign in page with Auth0 login link | Public |
+| `/gyms` | Gym directory with reviews and average ratings | Public |
+| `/profile` | Authenticated user dashboard | Protected |
+| `/gyms/new` | Form for adding a gym | Protected |
+| `/reviews/new` | Form for adding a review to an existing gym | Protected |
+
+The root route `/` redirects to `/login`.
+
+## Request Flow
+
+1. The React frontend calls the API using `frontend/src/config.ts`.
+2. Public data is loaded from `GET /gyms` and `GET /gyms/:id`.
+3. Login and logout links send the browser to the backend `/login` and `/logout` routes.
+4. The backend uses `express-openid-connect` to handle Auth0 login, callback, logout, and session cookies.
+5. The frontend checks the session by calling `GET /profile` with `credentials: "include"`.
+6. Protected API routes use `requiresAuth()` and return `401 Unauthorized` when there is no valid session.
+
+## API Routes
+
+| Method | Route | Purpose | Access |
+| --- | --- | --- | --- |
+| `GET` | `/ping` | Health check | Public |
+| `GET` | `/gyms` | List gyms with reviews | Public |
+| `GET` | `/gyms/:id` | Get one gym with reviews | Public |
+| `POST` | `/gyms` | Create a gym | Protected |
+| `DELETE` | `/gyms/:id` | Delete a gym | Protected |
+| `POST` | `/gyms/:id/reviews` | Create a review for a gym | Protected |
+| `GET` | `/profile` | Return Auth0 user profile | Protected |
+
+## Data Model
+
+The database has two main models:
+
+- `Gym`: `id`, `name`, `location`, `createdAt`
+- `Review`: `id`, `rating`, `comment`, `gymId`, `createdAt`
+
+Reviews belong to gyms. If a gym is deleted, its reviews are deleted too.
+
+The seed script creates starter gyms when the database is empty:
+
+- Iron House Gym in Stockholm
+- Nordic Fitness in Goteborg
+
+## Local Setup
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/ViktorOlausson/AssignmentDeployWebApp.git
 cd AssignmentDeployWebApp
 ```
 
-### Install dependencies
+The setup commands below assume you are starting from the project root.
 
 Install backend dependencies:
+
 ```bash
 cd backend
 npm install
 ```
 
-Install batabase dependencies:
-```bash
-cd backend
-npx prisma generate
-npx prisma db push # setup db file 'dev.db'
-```
+Install frontend dependencies:
 
-Install client dependencies:
 ```bash
-cd ../client
+cd frontend
 npm install
 ```
 
-### Configure environment variables
+Create a backend `.env` file:
 
-Create a backend `.env` file from the example:
 ```bash
 cd backend
 cp .env.example .env
 ```
 
-The backend needs these values:
+Required backend environment variables:
 
 ```env
 PORT=3000
@@ -60,37 +122,14 @@ AUTH0_CLIENT_SECRET=replace_me_optional
 
 Do not commit real `.env` values or Auth0 secrets.
 
-### Auth0 application settings
-
-In the Auth0 dashboard, configure the application with:
-
-```text
-Allowed Callback URLs:
-http://localhost:3000/callback, http://localhost:5173/callback, http://localhost:5173/login
-
-Allowed Logout URLs:
-http://localhost:5173/login
-
-Allowed Web Origins:
-http://localhost:5173/login
-
-Allowed Origins(CORS):
-http://localhost:5173, http://localhost:5173/login
-
-
-```
-
-### Database setup
-
-Run Prisma migration and seed data:
+Generate Prisma files, run migrations, and seed the database:
 
 ```bash
 cd backend
+npx prisma generate
 npm run prisma:migrate
 npm run prisma:seed
 ```
-
-### Run locally
 
 Start the backend:
 
@@ -99,45 +138,79 @@ cd backend
 npm run dev
 ```
 
-Start the frontend:
+Start the frontend in a second terminal:
 
 ```bash
-cd client
+cd frontend
 npm run dev
 ```
 
-Open:
+Open the local app:
+
 ```text
 http://localhost:5173
 ```
 
-## Setup docker
-* From the project root dir, run:
-```bash
-docker compose up
-[+] up 3/3
- ✔ Network assignmentdeploywebapp_default      Created                     0.1s
- ✔ Container assignmentdeploywebapp-backend-1  Created                     0.1s
- ✔ Container assignmentdeploywebapp-frontend-1 Created                     0.1s
-Attaching to backend-1, frontend-1
+## Auth0 Settings
+
+For local development, configure the Auth0 application with these URLs:
+
+```text
+Allowed Callback URLs:
+http://localhost:3000/callback
+
+Allowed Logout URLs:
+http://localhost:5173/login
+
+Allowed Web Origins:
+http://localhost:5173
+
+Allowed Origins (CORS):
+http://localhost:5173
 ```
-* Check if docker images is up and running:
+
+For production, add the deployed frontend and backend URLs as well:
+
+```text
+Allowed Callback URLs:
+https://assignmentdeploywebapp-backend-qvcj.onrender.com/callback
+
+Allowed Logout URLs:
+https://assignmentdeploywebapp-frontend.onrender.com/login
+
+Allowed Web Origins:
+https://assignmentdeploywebapp-frontend.onrender.com
+
+Allowed Origins (CORS):
+https://assignmentdeploywebapp-frontend.onrender.com
+```
+
+The backend `AUTH0_BASE_URL` should match the backend origin. The backend `FRONTEND_ORIGIN` should match the frontend origin.
+
+## Docker Setup
+
+From the project root, run:
+
+```bash
+docker compose up --build
+```
+
+Docker starts:
+
+- backend on `http://localhost:3000`
+- frontend on `http://localhost:5173`
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+Check running containers:
+
 ```bash
 docker ps
 ```
-* Go to http://localhost:5173
-
-## API Routes
-
-| Method | Route               | Access    |
-| ------ | ------------------- | --------- |
-| GET    | `/gyms`             | Public    |
-| GET    | `/gyms/:id`         | Public    |
-| POST   | `/gyms`             | Protected |
-| POST   | `/gyms/:id/reviews` | Protected |
-| GET    | `/profile`          | Protected |
-
-Protected routes require an authenticated Auth0 session.
 
 ## Testing
 
@@ -148,111 +221,33 @@ cd backend
 npm test
 ```
 
-The project uses Vitest for both unit and integration tests.
+The project uses Vitest for unit and integration tests. Tests use a separate SQLite database file, `backend/test.db`, so local development data in `backend/dev.db` is not reset.
 
-Tests use a separate SQLite database file:
-
-```text
-backend/test.db
-```
-
-This keeps local development data in `backend/dev.db` from being reset when tests run.
-
-Unit tests cover UI and utility logic in isolation without real network calls.
-
-Integration tests cover the API using `node:http`, including:
-
-- `GET /gyms`
-- `GET /gyms/:id`
-- `GET /gyms/:id` returning `404`
-- `POST /gyms` returning `401` when logged out
-- `POST /gyms/:id/reviews` returning `401` when logged out
-
-## Authentication
-
-This project uses **Auth0** with `express-openid-connect`.
-
-Auth0 was chosen because the assignment allows Auth0 session-based authentication, and it fits the backend/frontend setup well. The backend manages the login, callback, session cookie, and logout flow. The frontend redirects users to backend login/logout routes.
-
-Authentication is implemented in the backend with:
-
-- `authMiddleware`
-- `requiresAuth()`
-- `errorOnRequiredAuth: true`
-
-The protected API routes use `requiresAuth()`:
-
-- `POST /gyms`
-- `POST /gyms/:id/reviews`
-- `GET /profile`
-
-Unauthenticated users receive `401 Unauthorized` instead of being redirected.
-
-The frontend checks login state by calling:
-
-```text
-GET /profile
-```
-
-with:
-
-```ts
-credentials: "include";
-```
-
-Protected frontend routes and menu items are only shown when the user is logged in.
+Integration tests cover public gym endpoints and protected route behavior, including `401 Unauthorized` responses when logged out.
 
 ## Security Decisions
 
-### No secrets in the repository
+- Real secrets are kept in `.env`, which is ignored by Git.
+- `.env.example` documents required configuration without exposing secrets.
+- CORS is restricted to `FRONTEND_ORIGIN` and supports credentials for session cookies.
+- Auth0 tokens are not stored in `localStorage`.
+- Authenticated frontend requests use `credentials: "include"`.
+- Protected routes use `requiresAuth()` with `errorOnRequiredAuth: true`, so unauthenticated API requests return `401 Unauthorized`.
 
-Real Auth0 secrets and local environment values are kept in `.env`, which is ignored by Git. The repository includes `.env.example` to document required variables without exposing secrets.
-
-### Sensitive values are listed in `.env.example`
-
-The backend `.env.example` documents the required Auth0, database, and frontend origin settings so the project can be configured safely on another machine.
-
-### Protected routes return 401
-
-The backend uses `errorOnRequiredAuth: true`, so protected routes return `401 Unauthorized` when a user is not logged in. This is verified by integration tests.
-
-### CORS is restricted
-
-CORS is configured to allow only the frontend origin:
+## Project Structure
 
 ```text
-http://localhost:5173
+AssignmentDeployWebApp/
+  backend/
+    prisma/
+    src/
+    __tests__/
+    .env.example
+    package.json
+  frontend/
+    src/
+    nginx.conf
+    package.json
+  docker-compose.yml
+  README.md
 ```
-
-The API does not use a wildcard `*`, because authenticated requests use cookies and should only be allowed from the known frontend.
-
-### Tokens are not stored in localStorage
-
-The frontend does not store tokens in `localStorage`. Auth0 session handling is managed through secure session cookies by the backend middleware. This reduces the risk of token theft through client-side JavaScript.
-
-### Authenticated requests use credentials
-
-Frontend requests that need the logged-in session use:
-
-```ts
-credentials: "include";
-```
-
-This allows the browser to send the Auth0 session cookie to the backend.
-
-## Frontend
-
-The React frontend includes:
-
-- Login page
-- Profile dashboard
-- Public gyms page
-- Protected add gym page
-- Protected add review page
-- Login/logout navigation
-- Menu items that change based on login state
-- Loading and error states
-
-Public users can view gyms and reviews.
-
-Logged-in users can create gyms and reviews.
